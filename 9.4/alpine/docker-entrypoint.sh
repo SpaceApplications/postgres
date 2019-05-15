@@ -24,6 +24,29 @@ file_env() {
 	unset "$fileVar"
 }
 
+# Extraction of script execution function
+# usage: do_script /path/file.sh
+do_script() {
+    case "$1" in
+        *.sh)
+            # https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
+            # https://github.com/docker-library/postgres/pull/452
+            if [ -x "$1" ]; then
+                echo "$0: running $1"
+                "$1"
+            else
+                echo "$0: sourcing $1"
+                . "$1"
+            fi
+            ;;
+        *.sql)    echo "$0: running $1"; "${psql[@]}" -f "$1"; echo ;;
+        *.sql.gz) echo "$0: running $1"; gunzip -c "$1" | "${psql[@]}"; echo ;;
+        *)        echo "$0: ignoring $1" ;;
+    esac
+    echo
+}
+
+
 if [ "${1:0:1}" = '-' ]; then
 	set -- postgres "$@"
 fi
@@ -143,23 +166,7 @@ if [ "$1" = 'postgres' ]; then
 
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
-			case "$f" in
-				*.sh)
-					# https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
-					# https://github.com/docker-library/postgres/pull/452
-					if [ -x "$f" ]; then
-						echo "$0: running $f"
-						"$f"
-					else
-						echo "$0: sourcing $f"
-						. "$f"
-					fi
-					;;
-				*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
-				*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
-				*)        echo "$0: ignoring $f" ;;
-			esac
-			echo
+			do_script "$f"
 		done
 
 		PGUSER="${PGUSER:-$POSTGRES_USER}" \
@@ -168,9 +175,29 @@ if [ "$1" = 'postgres' ]; then
 		unset PGPASSWORD
 
 		echo
-		echo 'PostgreSQL init process complete; ready for start up.'
+		echo 'PostgreSQL initialisation process complete'
 		echo
 	fi
+
+    echo
+    echo 'PostgreSQL doing default configuration'
+    echo
+
+	# Start
+	pg_ctl -D "$PGDATA" \
+			-o "-c listen_addresses=''" \
+			-w start
+
+    for f in /docker-entrypoint-always.d/*; do
+        do_script "$f"
+    done
+
+    # End
+    pg_ctl -D "$PGDATA" -m fast -w stop
+
+    echo
+    echo 'PostgreSQL default configuration process complete'
+    echo
 fi
 
 exec "$@"

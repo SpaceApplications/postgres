@@ -1,0 +1,37 @@
+MASTER_DB_HOST=192.168.14.11
+MASTER_DB_PORT=5432
+MASTER_DB_REPLICATION_PASSWORD=WjH5Dn1W
+DB_NAME=msod
+
+DB_USER=django_user
+DB_PASSWORD=123
+
+ALFRESCO_HOST=http://10.1.10.37
+ALFRESCO_PORT=8180
+ALFRESCO_PASSWORD=admin
+ALFRESCO_USERNAME=admin
+
+CENTRAL_TOOL_BASE_URL=http://web-central:8000
+CENTRAL_TOOL_API_SCHEMA_URL=/issdb/m2m/api/schema/
+CENTRAL_TOOL_API_AUTH_USER=admin
+CENTRAL_TOOL_API_AUTH_PASSWORD=admin
+
+CENTRAL_TOOL_PM_EXCHANGE_ENDPOINT=/issdb/api/central-exchanged-planning-models/
+
+# production only
+DOMAIN_NAME=auth.iss-db.spaceapplications.com
+AUTH_SSO_PUBLIC_KEY=a.cert
+AUTH_SSO_PRIVATE_KEY=a.key
+RAVEN_DSN=
+
+# set to 1 to create empty database (without replication)
+CREATE_EMPTY_DB=
+
+EXTRA_ALLOWED_HOSTS=localhost,*
+
+ISS_DB=1
+
+DEPLOYMENT_ENVIRONMENT=production
+
+SILK=
+AGENCY_NAME=NASA

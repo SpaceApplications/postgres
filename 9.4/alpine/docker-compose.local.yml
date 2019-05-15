@@ -1,0 +1,17 @@
+version: '3'
+services:
+
+  db:
+    container_name: db
+    image: postgres/always
+    env_file: .docker-env.local
+#    environment:
+#      - POSTGRES_DB=msod
+    volumes:
+      - /var/iss-db/postgres/db/data:/var/lib/postgresql/data:rw
+      - /var/iss-db/postgres/db/backup:/var/iss-db/backup:rw
+      - /home/tso/Projects/postgres/9.4/alpine/docker-entrypoint.sh:/docker-entrypoint.sh
+      - /home/tso/Projects/postgres/9.4/alpine/docker-entrypoint-always.d:/docker-entrypoint-always.d
+    ports:
+      - ${DB_LT_PORT:-127.0.0.1:8432}:5432
+    restart: unless-stopped
